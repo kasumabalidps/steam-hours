@@ -1,0 +1,76 @@
+{
+  "bot": {
+    "version": "v1.0.0",
+    "settings": {
+      "appearOnline": false,
+      "acceptRandomFriendRequests": true,
+      "acceptItemNotify": true,
+      "acceptTradesNotify": true,
+      "acceptReplys": true,
+      "limits": 25,
+      "restriction": 5,
+      "proceedWithBannedAccount": false,
+      "playSoundOnNewItem": true
+    },
+    "messaging": {
+      "responseDelay": 1000,
+      "maxRetries": 3,
+      "retryDelay": 2000
+    }
+  },
+  "credentials": {
+    "username": "",
+    "password": "",
+    "gamesid": [],
+    "hasTwoFactorCode": false,
+    "appearOnline": false
+  },
+  "logging": {
+    "directory": "logs",
+    "filename": "logs.txt",
+    "maxFileSize": 5242880,
+    "levels": [
+      "STEAM",
+      "ERROR",
+      "BOT",
+      "TIP",
+      "INFO",
+      "LOAD",
+      "LEARN"
+    ]
+  },
+  "autoResponses": {
+    "default": "Orangnya lagi tidur ya"
+  },
+  "notifications": {
+    "desktop": {
+      "enabled": true,
+      "sound": true
+    },
+    "console": {
+      "colors": {
+        "error": "red",
+        "success": "green",
+        "info": "blue",
+        "warning": "yellow"
+      }
+    }
+  },
+  "security": {
+    "encryption": {
+      "enabled": true,
+      "algorithm": "aes-256-gcm",
+      "keyLength": 32
+    },
+    "rateLimit": {
+      "messages": {
+        "maxPerMinute": 5,
+        "blockDuration": 300000
+      },
+      "login": {
+        "maxAttempts": 3,
+        "lockoutDuration": 900000
+      }
+    }
+  }
+}
