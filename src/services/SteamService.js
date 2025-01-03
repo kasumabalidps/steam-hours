@@ -15,6 +15,9 @@ class SteamService {
         this.client.on('loggedOn', this.handleLoggedOn.bind(this));
         this.client.on('friendMessage', this.handleFriendMessage.bind(this));
         this.client.on('gameInvite', this.handleGameInvite.bind(this));
+        this.client.on('friendRelationship', this.handleFriendRequest.bind(this));
+        this.client.on('newItems', this.handleNewItems.bind(this));
+        this.client.on('tradeOffers', this.handleTradeOffers.bind(this));
     }
 
     async login(credentials) {
@@ -26,8 +29,6 @@ class SteamService {
 
             this.client.once('loggedOn', () => resolve());
             this.client.once('error', (err) => reject(err));
-
-            // Set timeout
             setTimeout(() => reject(new Error('Login timeout')), 60000);
         });
     }
@@ -71,19 +72,69 @@ class SteamService {
     }
 
     handleError(err) {
-        // ... error handling logic
+        this.logger.error(`Steam error: ${err.message}`);
+        if (err.eresult) {
+            switch (err.eresult) {
+                case SteamUser.EResult.InvalidPassword:
+                    this.logger.error('Invalid credentials');
+                    break;
+                case SteamUser.EResult.RateLimitExceeded:
+                    this.logger.error('Rate limit exceeded');
+                    break;
+                default:
+                    this.logger.error(`Steam error code: ${err.eresult}`);
+            }
+        }
     }
 
     handleLoggedOn() {
-        // ... logged on logic
+        this.logger.info('Successfully logged into Steam');
+        if (this.config.bot.settings.appearOnline) {
+            this.client.setPersona(SteamUser.EPersonaState.Online);
+        } else {
+            this.client.setPersona(SteamUser.EPersonaState.Invisible);
+        }
     }
 
     handleFriendMessage(steamID, message) {
-        // ... friend message logic
+        if (!this.config.bot.settings.acceptReplys) return;
+        
+        const response = this.config.autoResponses.default;
+        setTimeout(() => {
+            this.client.chatMessage(steamID, response);
+        }, this.config.bot.messaging.responseDelay);
     }
 
     handleGameInvite(inviterID) {
-        // ... game invite logic
+        if (this.config.bot.settings.acceptReplys) {
+            const response = this.config.autoResponses.default;
+            this.client.chatMessage(inviterID, response);
+        }
+    }
+
+    handleFriendRequest(steamID, relationship) {
+        if (relationship === 2 && this.config.bot.settings.acceptRandomFriendRequests) {
+            this.client.addFriend(steamID);
+            if (this.config.bot.settings.acceptReplys) {
+                const response = this.config.autoResponses.default;
+                this.client.chatMessage(steamID, response);
+            }
+        }
+    }
+
+    handleNewItems(count) {
+        if (this.config.bot.settings.acceptItemNotify) {
+            this.logger.info(`Received ${count} new items`);
+            if (this.config.bot.settings.playSoundOnNewItem) {
+                process.stdout.write('\x07');
+            }
+        }
+    }
+
+    handleTradeOffers(count) {
+        if (this.config.bot.settings.acceptTradesNotify) {
+            this.logger.info(`Received ${count} new trade offers`);
+        }
     }
 }
 
